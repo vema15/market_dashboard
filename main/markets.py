@@ -21,7 +21,6 @@ class AppFunctions:
         select_rates_df = rates_df.iloc[1:,:]
         return select_rates_df
 
-
     #Repo / Reverse Repo Ops
     def get_repo_rr_ops():
         repo_rate_url = "https://markets.newyorkfed.org//api/rp/all/all/results/latest.json"
@@ -71,9 +70,33 @@ class AppFunctions:
             print(frame)
 
     #CSV Export (Option 3)
+    def csv_export(self):
+        agg_dfs = self.agg_dfs()
+        try:
+            agg_dfs.to_csv("csv_files/mkt_data.csv")
+            print("Your export was successful")
+        except:
+            print("Your export was unsuccessful")
 
     #Clear Stored Files (Option 4)
-
+    def remove_files(self):
+        while True:
+            user_input = input("Which file would you like removed (.csv/.xlsx)? ").lower()
+            if user_input != ".csv" and user_input != ".xlsx":
+                print("Please enter valid file type")
+                continue
+            if user_input == ".csv":
+                try:
+                    os.remove("csv_files/mkt_data.csv")
+                except:
+                    print("The file you are trying to delete does not exist")
+            elif user_input == ".xlsx":
+                try:
+                    os.remove("sheets/raw_market_data.xlsx")
+                except:
+                    print("The file you are trying to delete does not exist")
+            print("Your file was successfully removed")
+            break
 
 class Application():
     def __init__(self) -> None:
@@ -102,25 +125,30 @@ class Application():
                 else:
                     print(f'{" "*fill_len} {value} {" "*fill_len}')
             print("*"*message_width)
-      
+
             user_input = int(input("Please enter your option: "))
             if user_input > 5 or user_input < 1:
                 print(error_messages['out_of_range_int'])
                 continue
             #Output Func Calls
+            print()
             if user_input == 1:
-                print()
                 self.app_obj.xslx_export()
-                print()
             elif user_input == 2:
-                print()
                 self.app_obj.term_print()
-                print()
-            
+            elif user_input == 3:
+                self.app_obj.csv_export()
+            elif user_input == 4:
+                self.app_obj.remove_files()
             elif user_input == 5:
+                print("Thank you for using the app, see you tomorrow!")
                 break
+            print()
+        print()
 
+def main():
+    print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end='\r')
+    obj = Application()
+    obj.program_run()
 
-obj = Application()
-obj.program_run()
-
+main()
