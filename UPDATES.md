@@ -10,3 +10,4 @@
 6) Created csv_export() method in AppFunctions that takes the aggregated DataFrames and exports them as a .csv file in the csv_files folder
 7) Created file_remove() method in AppFunctions that can clean the csv folder or clear the sheet folder of raw excel sheets. Note: Both the Excel and the CSV files are overwritten, so the purpose of this function is solely to get rid of the files and not to reduce clutter
 8) Created loading screen in main() function
+9) Modified print output formatting for term_print() method

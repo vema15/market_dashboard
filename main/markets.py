@@ -1,6 +1,5 @@
 import requests as rq
 import pandas as pd
-from datetime import date
 from openpyxl import load_workbook
 from yahoo_fin import stock_info as si
 import os
@@ -66,8 +65,11 @@ class AppFunctions:
 
     #Terminal Print (Option 2)
     def term_print(self):
-        for frame in self.master_frames:
-            print(frame)
+        table_titles = ['Reference Rates', 'Repo/Reverse Repo Rates', 'Equity Indices']
+        for i in range(len(self.master_frames)):
+            print(f'{"*"*3}{table_titles[i]}{"*"*3}')
+            print(self.master_frames[i])
+            print()
 
     #CSV Export (Option 3)
     def csv_export(self):
