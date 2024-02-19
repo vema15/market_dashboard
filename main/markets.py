@@ -10,6 +10,12 @@ import matplotlib.pyplot as plt
 class AppFunctions:
     def __init__(self) -> None:
         self.master_frames = [AppFunctions.get_ref_rates(), AppFunctions.get_repo_rr_ops(), AppFunctions.get_equity_inds()]
+        #UPDATE data_names whenever new information pulling methods are added
+        self.data_names = [
+            "Reference Rates",
+            "Repo/Reverse Repo Rates",
+            "Equity Index (ETF) Values"
+        ]
     #**RAW DATAFRAMES**
 
     #Important Ref Rates Info
@@ -93,6 +99,7 @@ class AppFunctions:
             ax[i].axis('off')
             ax[i].axis('tight')
             ax[i].table(cellText = celltext, colLabels = col, loc = 'center')
+            ax[i].set_title(self.data_names[i], color='white')
         fig.tight_layout()
         plt.show()
 

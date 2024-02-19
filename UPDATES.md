@@ -19,3 +19,4 @@
 3) Created visualizer() method in the AppFunctions class using matplotlib (pyplot) module. The method opens a windows containing three windows w/ equity, repo/reverse repo, and reference rate data. Added method to the program_run method in the Application class.
 4) Fixed bug in the remove_files() method that caused the message, "Your file was successfully removed" to be printed regardless of the actual success of the removal.
 5) Created an 'all' option in the remove_files() method to allow the user to simultaneosly remove the stored .xlsx and .csv files.
+6) Added titles to the tables shown in the visualizer() method
