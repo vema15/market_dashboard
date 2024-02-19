@@ -11,3 +11,11 @@
 7) Created file_remove() method in AppFunctions that can clean the csv folder or clear the sheet folder of raw excel sheets. Note: Both the Excel and the CSV files are overwritten, so the purpose of this function is solely to get rid of the files and not to reduce clutter
 8) Created loading screen in main() function
 9) Modified print output formatting for term_print() method
+10) Created rudimentary xlsx_export() method that converts the raw DataFrames into an Excel file under the sheets folder
+
+2/18/2024
+1) Created alternative API call to NY Fed for get_repo_rr_ops() method in order to reduce the likelihood of a blank DataFrame being returned
+2) Created call_tests folder containing ct.py, which tests the effectiveness of various API calls (Note: This file is solely for troubleshooting and is not part of the overall application structure)
+3) Created visualizer() method in the AppFunctions class using matplotlib (pyplot) module. The method opens a windows containing three windows w/ equity, repo/reverse repo, and reference rate data. Added method to the program_run method in the Application class.
+4) Fixed bug in the remove_files() method that caused the message, "Your file was successfully removed" to be printed regardless of the actual success of the removal.
+5) Created an 'all' option in the remove_files() method to allow the user to simultaneosly remove the stored .xlsx and .csv files.
