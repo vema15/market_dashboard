@@ -1,10 +1,10 @@
 import requests as rq
 import pandas as pd
 import numpy as np
-from openpyxl import load_workbook
 from yahoo_fin import stock_info as si
 import os
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 #MASTER FUNCTIONS
 class AppFunctions:
@@ -16,6 +16,7 @@ class AppFunctions:
             "Repo/Reverse Repo Rates",
             "Equity Index (ETF) Values"
         ]
+    
     #**RAW DATAFRAMES**
 
     #Important Ref Rates Info
@@ -83,11 +84,13 @@ class AppFunctions:
             return pd.DataFrame(["No Data Available for Equity Indices"])
         
     #**SYNTHESIZED DATAFRAMES**
+
     #Get frames
     def agg_dfs(self):
         return pd.concat(self.master_frames)
     
     #**DATA OUTPUT**
+    
     #Visualizer (Option 1)
     def visualizer(self):
         sep_tables = self.master_frames
@@ -110,8 +113,56 @@ class AppFunctions:
             print(f'{"*"*3}{table_titles[i]}{"*"*3}')
             print(self.master_frames[i])
             print()
+    
+    #Generate Report (Option 3):
+    def gen_mkt_report(self):
+        try:
+            print(f"Hello, and welcome to the Daily Market Report (as of {datetime.today()}).")
+            print(f"*** Note: If the current time is earlier than 4PM EST (NYSE market close), the equity indices' figures are from the previous day. ***")
+            print("Starting off with the equity indices,", end=" ")
+            close_status = {}
+            close_types = ["down", "up", "flat"]
+            for row in list(self.master_frames[2].iterrows()):
+                if row[1]['Open'] > row[1]['Close']:
+                    close_status[row[0]] = close_types[0]
+                elif row[1]['Open'] < row[1]['Close']:
+                    close_status[row[0]] = close_types[1]
+                elif row[1]['Open'] == row[1]['Close']:
+                    close_status[row[0]] = close_types[2]
+            absolute_close = False
+            for i in close_types:
+                if list(close_status.values()).count(i) == 3:
+                    print(f"all of the major U.S. equity indices closed {i} today.")
+                    absolute_close = True
+            if absolute_close == False:
+                counter = 1
+                for key, value in close_status.items():
+                    if counter == 0:
+                        print(f"The {key} index closed {value},", end=" ")
+                    elif counter == len(close_status):
+                        print(f"and the {key} index closed {value}.")
+                    else:
+                        print(f"the {key} index closed {value},", end=" ")
+                    counter += 1
+            repo_info = list(self.master_frames[1].iterrows())
+            print(f"Switching over to rates, the FED's Treasury-backed overnight reverse repo rate is sitting at {repo_info[-1][1]['Rate']} percent, and its Treasury-backed repo rate is sitting at {repo_info[0][1]['Rate']} percent.")
+            print(f"This is showing a spread of {float(float(repo_info[0][1]['Rate']) - float(repo_info[-1][1]['Rate'])):.2f} percent for the FED.")
+            ref_rates_info = list(self.master_frames[0].iterrows())
+            rates_range = (min([row[1]["Rate (%)"] for row in ref_rates_info]), max([row[1]["Rate (%)"] for row in ref_rates_info]))
+            print(f"Reference rates are sitting in the range of {rates_range[0]} to {rates_range[1]} percent, with", end=" ")
+            counter = 1
+            for row in ref_rates_info:
+                if counter == len(ref_rates_info):
+                    print(f"and the {row[1]['Rate Type']} at {row[1]['Rate (%)']} percent.")
+                else:
+                    print(f"the {row[1]['Rate Type']} at {row[1]['Rate (%)']} percent,", end=" ")
+                counter += 1
+            print("This concludes today's market report. See you tomorrow.")
+        except:
+            print("...")
+            print("There was an error procuring the data necessary to produce the rest of the market report. Please try again later.")  
 
-    #CSV Export (Option 3)
+    #CSV Export (Option 4)
     def csv_export(self):
         agg_dfs = self.agg_dfs()
         try:
@@ -120,11 +171,11 @@ class AppFunctions:
         except:
             print("Your export was unsuccessful")
 
-    #Excel Export (Option 4)
+    #Excel Export (Option 5)
     def xlsx_export(self):
         pd.read_csv('csv_files/mkt_data.csv').to_excel('sheets/rawdata.xlsx')
 
-    #Clear Stored Files (Option 5)
+    #Clear Stored Files (Option 6)
     def remove_files(self):
         while True:
             user_input = input("Which file would you like removed (.csv/.xlsx/all)? ").lower()
@@ -176,14 +227,15 @@ class Application():
             "intro": "Welcome to your Market Dashboard",
             "option_1": "Enter 1 to Use the Data Visualizer",
             "option_2": "Enter 2 to Display Data in Terminal",
-            "option_3": "Enter 3 to Receive Data in CSV File",
-            "option_4": "Enter 4 to Receive Data in Excel File",
-            "option_5": "Enter 5 to Clear Stored Files",
-            "option_6": "Enter 6 to Quit Program"
+            "option_3": "Enter 3 to Generate Market Report",
+            "option_4": "Enter 4 to Receive Data in CSV File",
+            "option_5": "Enter 5 to Receive Data in Excel File",
+            "option_6": "Enter 6 to Clear Stored Files",
+            "option_7": "Enter 7 to Quit Program"
         }
         error_messages = {
             "non_int": "Please enter a valid option (Error: User input is not number)",
-            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-5)"
+            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-7)"
         }
         while True:
             for key, value in user_options.items():
@@ -195,7 +247,7 @@ class Application():
             print("*"*message_width)
 
             user_input = int(input("Please enter your option: "))
-            if user_input > 6 or user_input < 1:
+            if user_input > 7 or user_input < 1:
                 print(error_messages['out_of_range_int'])
                 continue
             #Output Func Calls
@@ -205,12 +257,14 @@ class Application():
             elif user_input == 2:
                 self.app_obj.term_print()
             elif user_input == 3:
-                self.app_obj.csv_export()
+                self.app_obj.gen_mkt_report()
             elif user_input == 4:
-                self.app_obj.xlsx_export()
+                self.app_obj.csv_export()
             elif user_input == 5:
-                self.app_obj.remove_files()
+                self.app_obj.xlsx_export()
             elif user_input == 6:
+                self.app_obj.remove_files()
+            elif user_input == 7:
                 print("Thank you for using the app, see you tomorrow!")
                 break
             print()

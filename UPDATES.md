@@ -20,3 +20,10 @@
 4) Fixed bug in the remove_files() method that caused the message, "Your file was successfully removed" to be printed regardless of the actual success of the removal.
 5) Created an 'all' option in the remove_files() method to allow the user to simultaneosly remove the stored .xlsx and .csv files.
 6) Added titles to the tables shown in the visualizer() method
+
+2/26/2024
+1) Updated the user menu to reflect new options
+2) Created the outline for the gen_mkt_update() method in the AppFunctions class
+3) Wrote the script for the market report in the gen_mkt_update() method
+4) Made the script within the gen_mkt_update() responsive to the output of varying API calls
+5) Created failsafe for the gen_mkt_update() in case any of the data sourced from the APIs fail.
