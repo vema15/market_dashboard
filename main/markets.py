@@ -6,10 +6,11 @@ import os
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-#MASTER FUNCTIONS
-class AppFunctions:
+#MARKET FUNCTIONS
+
+class MktAppFunctions:
     def __init__(self) -> None:
-        self.master_frames = [AppFunctions.get_ref_rates(), AppFunctions.get_repo_rr_ops(), AppFunctions.get_equity_inds()]
+        self.master_frames = [MktAppFunctions.get_ref_rates(), MktAppFunctions.get_repo_rr_ops(), MktAppFunctions.get_equity_inds()]
         #UPDATE data_names whenever new information pulling methods are added
         self.data_names = [
             "Reference Rates",
@@ -216,12 +217,21 @@ class AppFunctions:
                     print("There are no files to remove")
             break
 
-class Application():
+#ECONOMY FUNCTIONS
+
+class EconAppFunctions:
     def __init__(self) -> None:
-        self.app_obj = AppFunctions()
+        pass
+
+#MASTER UI
+
+class UserInterface():
+    def __init__(self) -> None:
+        self.mkt_app_obj = MktAppFunctions()
+        self.econ_app_obj = EconAppFunctions()
         
-    #Menu
-    def program_run(self):
+    #Market Menu
+    def mkt_ui_run(self):
         message_width = 75
         user_options = {
             "intro": "Welcome to your Market Dashboard",
@@ -231,7 +241,7 @@ class Application():
             "option_4": "Enter 4 to Receive Data in CSV File",
             "option_5": "Enter 5 to Receive Data in Excel File",
             "option_6": "Enter 6 to Clear Stored Files",
-            "option_7": "Enter 7 to Quit Program"
+            "option_7": "Enter 7 to Exit Market Menu"
         }
         error_messages = {
             "non_int": "Please enter a valid option (Error: User input is not number)",
@@ -253,25 +263,77 @@ class Application():
             #Output Func Calls
             print()
             if user_input == 1:
-                self.app_obj.visualizer()
+                self.mkt_app_obj.visualizer()
             elif user_input == 2:
-                self.app_obj.term_print()
+                self.mkt_app_obj.term_print()
             elif user_input == 3:
-                self.app_obj.gen_mkt_report()
+                self.mkt_app_obj.gen_mkt_report()
             elif user_input == 4:
-                self.app_obj.csv_export()
+                self.mkt_app_obj.csv_export()
             elif user_input == 5:
-                self.app_obj.xlsx_export()
+                self.mkt_app_obj.xlsx_export()
             elif user_input == 6:
-                self.app_obj.remove_files()
+                self.mkt_app_obj.remove_files()
             elif user_input == 7:
-                print("Thank you for using the app, see you tomorrow!")
                 break
             print()
         print()
+    
+    #Economy Menu
+    def econ_ui_run(self):
+        #Placeholder
+        print("Hello")
+
+#TOP-LEVEL APPLICATION
+
+class Application:
+    def __init__(self) -> None:
+        pass
+
+    def menu_select(self):
+        message_width = 75
+        print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end='\r')   
+        ui_obj = UserInterface()
+        ui_msgs = {
+            'welcome_message': "Welcome to the One Stop Shop for Markets and Economic Data!",
+            'input_message': 'Please Enter Your Desired Data Field (Economy/Markets):'
+        }
+        user_options = {
+            "option_1": "Enter 1 to View Market Dashboard",
+            "option_2": "Enter 2 to View Economic Data Menu",
+            "option_3": "Enter 3 to Quit Program"
+        }
+        print(f"{' ' * ((message_width-len(ui_msgs['welcome_message']))//2)}{ui_msgs['welcome_message']}{' ' * ((message_width-len(ui_msgs['welcome_message']))//2)}")
+        while True:
+            print("|" * (message_width))
+            for key, value in user_options.items():
+                wt_space_amt = (((message_width - len(value))-2)//2)
+                if wt_space_amt % 2 == 0:
+                    print(f"|{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}|")
+                else:
+                    print(f"|{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}|")
+            print("|" * (message_width))
+            print()
+            try:
+                menu_select = int(input("Please Enter Your Option: "))
+            except:
+                print("Please Enter a Valid Option (error: non-integer)")
+                continue
+            if menu_select > 3 or menu_select < 1:
+                print("Please Enter a Valid Number (1-3)")
+                continue
+            print()
+            if menu_select == 1:
+                ui_obj.mkt_ui_run()
+            elif menu_select == 2:
+                ui_obj.econ_ui_run()
+            elif menu_select == 3:
+                print("See You Tomorrow!")
+                break
+            print()
 
 def main():
-   print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end='\r')
-   obj = Application()
-   obj.program_run()
+   app_obj = Application()
+   app_obj.menu_select()
+ 
 main()

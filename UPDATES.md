@@ -26,4 +26,12 @@
 2) Created the outline for the gen_mkt_update() method in the AppFunctions class
 3) Wrote the script for the market report in the gen_mkt_update() method
 4) Made the script within the gen_mkt_update() responsive to the output of varying API calls
-5) Created failsafe for the gen_mkt_update() in case any of the data sourced from the APIs fail.
+5) Created failsafe for the gen_mkt_update() in case any of the data sourced from the APIs fail
+
+2/27/2024
+1) Changed AppFunctions class to MktAppFunctions to accomodate future classes
+2) Changed Application class to UserInterface class in order to reflect the class's true function
+3) Changed ui_run method in the UserInferface class to the mkt_ui_run method to make room for the future econ_ui_run method (Econ. data menu)
+4) Moved the contents of the the old main class into the new Application class
+5) Created econ_ui_run method in the UserInterface class
+6) Created menu_select method that acts as a master access menu (while True) for the markets and economy classes and their methods in the Application class 
