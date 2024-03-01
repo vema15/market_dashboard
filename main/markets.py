@@ -220,8 +220,110 @@ class MktAppFunctions:
 #ECONOMY FUNCTIONS
 
 class EconAppFunctions:
+    api_key = "863833a039ac133dca6d4e28e7215ae8"
+    base_url_1 = "https://api.stlouisfed.org/fred/series/observations?series_id="
+    base_url_2 = f"&api_key={api_key}&sort_order=desc&file_type=json"
+    
     def __init__(self) -> None:
-        pass
+        ##US ECON FIGURES##
+
+        #Economic Growth Figures
+        self.econ_growth_ids = {
+            "real_gdp": ("Real GDP","GDPC1", "Billions of Chained 2017 Dollars ", "Quarterly")
+        }
+
+        #Household Income and Expenditures    
+        self.house_inc_exp_ids = {
+            "pers_savings_rate": ("Personal Savings Rate","PSAVERT", "Percent" , "Monthly"),
+            "real_disp_income": ("Real Disposable Income","DSPIC96", "Billions of Chained 2017 Dollars" , "Monthly"),
+            "retail_sales": ("Retail Sales","MRTSSM44000USS", "Millions of Dollars" , "Montly"),
+            "consumer_credit": ("Consumer Credit","TOTALSL", "Billions of Dollars" , "Monthly"),
+            "consumer_credit_del": ("Consumer Credit Delinquency Rate","DRCCLACBS", "Percent" , "Quarterly"),
+            "consumer_sentiment": ("Consumer Sentiment (UMich)","UMCSENT", "Index 1966:Q1=100" , "Monthly")
+        }
+    
+        #Business Profits and Investments
+        self.bus_prof_inv_ids = {
+            "corp_profits_at": ("Corporate Profits after Taxes","CP", "Billions of Dollars", "Quarterly")
+        }
+
+        #Labor
+        self.labor_ids = {
+            "employment_level": ("Employment Level","CE16OV", "Thousands of Persons", "Monthly"),
+            "avg_total_priv_hours": ("Average Total Private Work Hours","AWHAETP", "Hours", "Monthly"),
+            "avg_total_priv_earnings": ("Average Total Private Work Earnings","CES0500000011", "Dollars per Week", "Monthly"),
+            "employment_cost_ind_priv": ("Private Employment Cost Index","ECIWAG", "Index Dec 2005=100", "Quarterly"),
+            "job_openings_priv": ("Private Job Openings","JTS1000JOL", "Level in Thousands", "Monthly"),
+            "unemployment_rate": ("Unemployment Rate","UNRATE", "Percent", "Monthly"),
+            "nonfarm_lab_productivity": ("Non-Farm Labor Productivity","OPHNFB", "Index 2017=100", "Quarterly"),
+            "nonfarm_unit_lab_costs": ("Non-Farm Unit Labor Costs","ULCNFB", "Index 2017 = 100", "Quarterly")
+        }
+
+        #Inflation and Deflation
+        self.inf_def_ids = {
+            "med_cpi": ("Median CPI","MEDCPIM158SFRBCLE", "Percent Change at Annual Rate", "Monthly"),
+            "ppi_all_commods": ("PPI (All Commodities)","PPIACO", "Index 1982=100", "Monthly"),
+            "import_price_ind": ("Import Price Index","IR", "Index 2000 = 100", "Monthly"),
+            "export_price_ind": ("Export Price Index","IQ", "Index 2000 = 100", "Monthly")
+        }
+    
+        #Production
+        self.production_ids =  {
+            "industrial_prod": ("Industrial Production Index","INDPRO", "Index 2017 = 100", "Monthly"),
+            "capacity_util_ind": ("Capacity Utilization Index","TCU", "Percent of Capacity", "Monthly"),
+            "manu_new_ord": ("Manufacturer's New Orders","AMTMNO", "Millions of Dollars", "Monthly"),
+            "inv_to_sales": ("Inventory-to-Sales Ratio","ISRATIO", "Ratio", "Monthly")
+        }
+
+        #Housing
+        self.housing_ids = {
+            "house_price_ind": ("Housing Price Index","USSTHPI", "Index 1980:Q1 = 100", "Quarterly"),
+            "housing_starts": ("Housing Starts","HOUST", "Thousands of Units", "Monthly"),
+            "exis_home_sales": ("Existing Home Sales","EXHOSLUSM495S", "Number of Units", "Monthly"),
+            "new_sfr_sales": ("New Single Family Residential Home Sales","HSN1F", "Thousands", "Monthly"),
+            "home_vac_rate": ("Home Vacancy Rate","USHVAC", "Percent", "Annual"),
+            "house_afford_index": ("Housing Affordability Index","FIXHAI", "Index", "Monthly"),
+            "sfr_delinquency": ("Single Family Residential Mortgage Delinquency Rate","DRSFRMACBS", "Percent", "Quarterly"),
+        }
+
+        #Finance
+        self.finance_ids = {
+            "bank_loans": ("Bank Loans","TOTLL", "Billions of U.S. Dollars", "Weekly")
+        }
+
+        #Government
+        self.gov_ids = {
+            "gov_exp": ("Government Expenditures","FGEXPND", "Billions of Dollars", "Quarterly")
+        }
+  
+        #Economic Well-Being
+        self.econ_wb_ids = {
+            "one_pct_wealth_share": ("Share of Wealth (top 1%)","WFRBST01134", "Percent of Aggregate", "Quarterly"),
+            "poverty_pct": ("Poverty Rate","PPAAUS00000A156NCEN", "Percent", "Annual")
+        }
+    
+        ##INTERNATIONAL FIGURES##
+        self.intl_figs_ids = {
+            "bal_of_trade": ("Balance of Trade","BOPGSTB", "Millions of Dollars", "Monthly"),
+            "intl_invest_position": ("International Investment Position","IIPUSNETIQ", "Millions of Dollars", "Quarterly")
+        }
+
+    ##DATA AGGREGATION AND MODIFICATION METHODS##
+    
+    def agg_category(self, category):
+        series_data_list = []
+        for key, value in category.items():
+            total_url = EconAppFunctions.base_url_1+value[1]+EconAppFunctions.base_url_2
+            data_req = rq.get(total_url)
+            data_req_json = data_req.json()
+            series_data_list.append((value[0], value[2], value[3], data_req_json['observations'][0]['date'], data_req_json['observations'][0]['value'], data_req_json['observations'][1]['date'],  data_req_json['observations'][1]['value'], f"{(((float(data_req_json['observations'][0]['value'])-float(data_req_json['observations'][1]['value']))/float(data_req_json['observations'][1]['value'])) * 100):.2f}%"))
+        econ_df = pd.DataFrame(series_data_list, columns=['|Indicator|', '|Units|', '|Release Interval|', '|Latest Release Date|', '|Latest Release Value|', '|Penultimate Release Date|', '|Penultimate Release Value|', '|Percent Change between Periods|'])
+        econ_df.set_index('|Indicator|', inplace=True)
+        return econ_df
+    
+    #Economic Ratios
+    def econ_ratios(self):
+        print("This method is currently under construction. Please check back later.")
 
 #MASTER UI
 
@@ -234,55 +336,170 @@ class UserInterface():
     def mkt_ui_run(self):
         message_width = 75
         user_options = {
-            "intro": "Welcome to your Market Dashboard",
+            "intro": "Welcome to the Market Dashboard",
             "option_1": "Enter 1 to Use the Data Visualizer",
             "option_2": "Enter 2 to Display Data in Terminal",
             "option_3": "Enter 3 to Generate Market Report",
             "option_4": "Enter 4 to Receive Data in CSV File",
             "option_5": "Enter 5 to Receive Data in Excel File",
             "option_6": "Enter 6 to Clear Stored Files",
-            "option_7": "Enter 7 to Exit Market Menu"
+            "option_7": "Enter 7 to Return to Main Menu"
         }
         error_messages = {
             "non_int": "Please enter a valid option (Error: User input is not number)",
             "out_of_range_int": "Please enter a valid option (Error: User input is not 1-7)"
         }
         while True:
+            print("*" * (message_width))
             for key, value in user_options.items():
-                fill_len = (message_width-len(value))//2
-                if key == 'intro':
-                    print(f'{"*"*fill_len} {value} {"*"*fill_len}')
+                wt_space_amt = (((message_width - len(value))-2)//2)
+                if wt_space_amt % 2 == 0:
+                    print(f"*{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}*")
                 else:
-                    print(f'{" "*fill_len} {value} {" "*fill_len}')
-            print("*"*message_width)
-
-            user_input = int(input("Please enter your option: "))
-            if user_input > 7 or user_input < 1:
-                print(error_messages['out_of_range_int'])
+                    print(f"*{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}*")
+            print("*" * (message_width))
+            print()
+            try:
+                user_input = int(input("Please enter your option: "))
+                if user_input > 7 or user_input < 1:
+                    print(error_messages['out_of_range_int'])
+                    continue
+                #Output Func Calls
+                print()
+                if user_input == 1:
+                    self.mkt_app_obj.visualizer()
+                elif user_input == 2:
+                    self.mkt_app_obj.term_print()
+                elif user_input == 3:
+                    self.mkt_app_obj.gen_mkt_report()
+                elif user_input == 4:
+                    self.mkt_app_obj.csv_export()
+                elif user_input == 5:
+                    self.mkt_app_obj.xlsx_export()
+                elif user_input == 6:
+                    self.mkt_app_obj.remove_files()
+                elif user_input == 7:
+                    break
+                print()
+            except:
+                print(error_messages['non_int'])
+            user_input = input("Press Enter to Continue")
+            if user_input:
                 continue
-            #Output Func Calls
-            print()
-            if user_input == 1:
-                self.mkt_app_obj.visualizer()
-            elif user_input == 2:
-                self.mkt_app_obj.term_print()
-            elif user_input == 3:
-                self.mkt_app_obj.gen_mkt_report()
-            elif user_input == 4:
-                self.mkt_app_obj.csv_export()
-            elif user_input == 5:
-                self.mkt_app_obj.xlsx_export()
-            elif user_input == 6:
-                self.mkt_app_obj.remove_files()
-            elif user_input == 7:
-                break
-            print()
         print()
     
+    def econ_series_menu(self):
+        message_width = 75
+        user_options = {
+            "intro": "Economic Categories Menu",
+            "option_1": "Enter 1 for Economic Growth Figures",
+            "option_2": "Enter 2 for Household Income and Expenditures Figures",
+            "option_3": "Enter 3 for Business Profits and Investments Figures",
+            "option_4": "Enter 4 for Labor Figures",
+            "option_5": "Enter 5 for Inflation and Deflation Figures",
+            "option_6": "Enter 6 for Production Figures",
+            "option_7": "Enter 7 for Housing Figures",
+            "option_8": "Enter 8 for Finance Figures",
+            "option_9": "Enter 9 for Government Figures",
+            "option_10": "Enter 10 for Economic Well-Being Figures",
+            "option_11": "Enter 11 for International Trade Figures",
+            "option_12": "Enter 12 to Return to the Main Economic Menu"
+        }
+
+        error_messages = {
+            "non_int": "Please enter a valid option (Error: User input is not number)",
+            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-7)"
+        }
+        while True:
+            print("x" * (message_width))
+            for key, value in user_options.items():
+                wt_space_amt = (((message_width - len(value))-2)//2)
+                if wt_space_amt % 2 == 0:
+                    print(f"x{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}x")
+                else:
+                    print(f"x{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}x")
+            print("x" * (message_width))
+            print()
+            try:
+                user_input = int(input("Please enter your option: "))
+                if user_input > 12 or user_input < 1:
+                    print(error_messages["out_of_range_int"])
+                    continue
+                print()
+                if user_input == 1:
+                    category = self.econ_app_obj.econ_growth_ids
+                elif user_input == 2:
+                    category = self.econ_app_obj.house_inc_exp_ids
+                elif user_input == 3:
+                    category = self.econ_app_obj.bus_prof_inv_ids
+                elif user_input == 4:
+                    category = self.econ_app_obj.labor_ids
+                elif user_input == 5:
+                    category = self.econ_app_obj.inf_def_ids
+                elif user_input == 6:
+                    category = self.econ_app_obj.production_ids
+                elif user_input == 7:
+                    category = self.econ_app_obj.housing_ids
+                elif user_input == 8:
+                    category = self.econ_app_obj.finance_ids
+                elif user_input == 9:
+                    category = self.econ_app_obj.gov_ids
+                elif user_input == 10:
+                    category = self.econ_app_obj.econ_wb_ids
+                elif user_input == 11:
+                    category = self.econ_app_obj.intl_figs_ids
+                elif user_input == 12:
+                    return
+                print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end="\r", flush=True)
+                print(self.econ_app_obj.agg_category(category))
+                print()
+            except:
+                print(error_messages['non_int'])
+            user_input = input("Press Enter to Continue")
+            if user_input:
+                continue
+            print()
+
     #Economy Menu
     def econ_ui_run(self):
-        #Placeholder
-        print("Hello")
+        message_width = 75
+        user_options = {
+            "intro": "Welcome to the Economic Dashboard",
+            "option_1": "Enter 1 to View Categorical Series Menu",
+            "option_2": "Enter 2 to View Economic Ratios",
+            "option_3": "Enter 3 to Return to Main Menu"
+        }
+        error_messages = {
+            "non_int": "Please enter a valid option (Error: User input is not number)",
+            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-7)"
+        }
+
+        while True:
+            print("*" * (message_width))
+            for key, value in user_options.items():
+                wt_space_amt = (((message_width - len(value))-2)//2)
+                if wt_space_amt % 2 == 0:
+                    print(f"*{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}*")
+                else:
+                    print(f"*{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}*")
+            print("*" * (message_width))
+            print()
+            try:
+                user_input = int(input("Please enter your option: "))
+                if user_input > 3 or user_input < 1:
+                    print(error_messages['out_of_range_int'])
+                    continue
+                #Output Func Calls
+                print()
+                if user_input == 1:
+                    self.econ_series_menu()
+                elif user_input == 2:
+                    self.econ_app_obj.econ_ratios()
+                elif user_input == 3:
+                    break
+            except:
+                print(error_messages['non_int'])
+            print()
 
 #TOP-LEVEL APPLICATION
 

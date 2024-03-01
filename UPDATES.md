@@ -35,3 +35,18 @@
 4) Moved the contents of the the old main class into the new Application class
 5) Created econ_ui_run method in the UserInterface class
 6) Created menu_select method that acts as a master access menu (while True) for the markets and economy classes and their methods in the Application class 
+
+2/28/2024
+1) Created several methods in the EconAppFunctions class to fetch different categories of economic data series from the FRED API.
+
+2/29/2024
+1) Added indicator name, units, and data intervals to each item in the the series_ids dictionaries in the EconAppFunctions fetching methods
+2) Created master menu for the economic data
+3) Created submenu in the UserInterface class to access the categorical economic data series methods created in the EconAppFunctions class
+4) Got rid of the methods that house the series ids and created a single agg_category() method to aggregate to the data in order to reduce redundancy. Placed the ids in the initializer method instead.
+5) agg_category() method now returns a Pandas Dataframe with the columns '|Indicator|', '|Units|', '|Release Interval|', '|Latest Release Date|', '|Latest Release Value|', '|Penultimate Release Date|', '|Penultimate Release Value|', '|Percent Change between Periods|'.
+6) Added minor aesthetic tweaks to the menu layouts (turned them into center-aligned boxes)
+7) Added an extra catch in order to prevent the menus from immediately crowding the terminal after a query is entered.
+
+********Beta 1.0 Complete************
+
