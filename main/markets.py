@@ -456,7 +456,7 @@ class UserInterface():
 
         error_messages = {
             "non_int": "Please enter a valid option (Error: User input is not number)",
-            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-7)"
+            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-12)"
         }
         while True:
             print("x" * (message_width))
@@ -468,42 +468,42 @@ class UserInterface():
                     print(f"x{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}x")
             print("x" * (message_width))
             print()
-            #try:
-            user_input = int(input("Please enter your option: "))
-            if user_input > 12 or user_input < 1:
-                print(error_messages["out_of_range_int"])
-                continue
-            print()
-            if user_input == 1:
-                category = self.econ_app_obj.econ_growth_ids
-            elif user_input == 2:
-                category = self.econ_app_obj.house_inc_exp_ids
-            elif user_input == 3:
-                category = self.econ_app_obj.bus_prof_inv_ids
-            elif user_input == 4:
-                category = self.econ_app_obj.labor_ids
-            elif user_input == 5:
-                category = self.econ_app_obj.inf_def_ids
-            elif user_input == 6:
-                category = self.econ_app_obj.production_ids
-            elif user_input == 7:
-                category = self.econ_app_obj.housing_ids
-            elif user_input == 8:
-                category = self.econ_app_obj.finance_ids
-            elif user_input == 9:
-                category = self.econ_app_obj.gov_ids
-            elif user_input == 10:
-                category = self.econ_app_obj.econ_wb_ids
-            elif user_input == 11:
-                category = self.econ_app_obj.intl_figs_ids
-            elif user_input == 12:
-                return
-            print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end="\r", flush=True)
-            print(self.econ_app_obj.agg_category(category))
-            print()
-            #except:
-            #    print(error_messages['non_int'])
-            #user_input = input("Press Enter to Continue")
+            try:
+                user_input = int(input("Please enter your option: "))
+                if user_input > 12 or user_input < 1:
+                    print(error_messages["out_of_range_int"])
+                    continue
+                print()
+                if user_input == 1:
+                    category = self.econ_app_obj.econ_growth_ids
+                elif user_input == 2:
+                    category = self.econ_app_obj.house_inc_exp_ids
+                elif user_input == 3:
+                    category = self.econ_app_obj.bus_prof_inv_ids
+                elif user_input == 4:
+                    category = self.econ_app_obj.labor_ids
+                elif user_input == 5:
+                    category = self.econ_app_obj.inf_def_ids
+                elif user_input == 6:
+                    category = self.econ_app_obj.production_ids
+                elif user_input == 7:
+                    category = self.econ_app_obj.housing_ids
+                elif user_input == 8:
+                    category = self.econ_app_obj.finance_ids
+                elif user_input == 9:
+                    category = self.econ_app_obj.gov_ids
+                elif user_input == 10:
+                    category = self.econ_app_obj.econ_wb_ids
+                elif user_input == 11:
+                    category = self.econ_app_obj.intl_figs_ids
+                elif user_input == 12:
+                    return
+                print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end="\r", flush=True)
+                print(self.econ_app_obj.agg_category(category))
+                print()
+            except:
+                print(error_messages['non_int'])
+            user_input = input("Press Enter to Continue")
             if user_input:
                 continue
             print()
@@ -519,7 +519,7 @@ class UserInterface():
         }
         error_messages = {
             "non_int": "Please enter a valid option (Error: User input is not number)",
-            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-7)"
+            "out_of_range_int": "Please enter a valid option (Error: User input is not 1-3)"
         }
 
         while True:
@@ -532,21 +532,21 @@ class UserInterface():
                     print(f"*{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}*")
             print("*" * (message_width))
             print()
-            #try:
-            user_input = int(input("Please enter your option: "))
-            if user_input > 4 or user_input < 1:
-                print(error_messages['out_of_range_int'])
-                continue
-            #Output Func Calls
-            print()
-            if user_input == 1:
-                self.econ_series_menu()
-            elif user_input == 2:
-                self.econ_app_obj.econ_report()
-            elif user_input == 3:
-                break
-            #except:
-            #    print(error_messages['non_int'])
+            try:
+                user_input = int(input("Please enter your option: "))
+                if user_input > 3 or user_input < 1:
+                    print(error_messages['out_of_range_int'])
+                    continue
+                #Output Func Calls
+                print()
+                if user_input == 1:
+                    self.econ_series_menu()
+                elif user_input == 2:
+                    self.econ_app_obj.econ_report()
+                elif user_input == 3:
+                    break
+            except:
+                print(error_messages['non_int'])
             print()
 
 #TOP-LEVEL APPLICATION
