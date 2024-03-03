@@ -271,7 +271,7 @@ class EconAppFunctions:
         self.production_ids =  {
             "industrial_prod": ("Industrial Production Index","INDPRO", "Index 2017 = 100", "Monthly"),
             "capacity_util_ind": ("Capacity Utilization Index","TCU", "Percent of Capacity", "Monthly"),
-            "manu_new_ord": ("Manufacturer's New Orders","AMTMNO", "Millions of Dollars", "Monthly"),
+            "manu_new_ord": ("Manufacturers New Orders","AMTMNO", "Millions of Dollars", "Monthly"),
             "inv_to_sales": ("Inventory-to-Sales Ratio","ISRATIO", "Ratio", "Monthly")
         }
 
@@ -316,15 +316,63 @@ class EconAppFunctions:
             total_url = EconAppFunctions.base_url_1+value[1]+EconAppFunctions.base_url_2
             data_req = rq.get(total_url)
             data_req_json = data_req.json()
-            series_data_list.append((value[0], value[2], value[3], data_req_json['observations'][0]['date'], data_req_json['observations'][0]['value'], data_req_json['observations'][1]['date'],  data_req_json['observations'][1]['value'], f"{(((float(data_req_json['observations'][0]['value'])-float(data_req_json['observations'][1]['value']))/float(data_req_json['observations'][1]['value'])) * 100):.2f}%"))
-        econ_df = pd.DataFrame(series_data_list, columns=['|Indicator|', '|Units|', '|Release Interval|', '|Latest Release Date|', '|Latest Release Value|', '|Penultimate Release Date|', '|Penultimate Release Value|', '|Percent Change between Periods|'])
+            series_data_list.append((value[0], value[2], value[3], data_req_json['observations'][0]['date'], data_req_json['observations'][0]['value'], data_req_json['observations'][1]['date'],  data_req_json['observations'][1]['value'], (((float(data_req_json['observations'][0]['value'])-float(data_req_json['observations'][1]['value']))/float(data_req_json['observations'][1]['value'])) * 100)))
+        econ_df = pd.DataFrame(series_data_list, columns=['|Indicator|', '|Units|', '|Release Interval|', '|Latest Release Date|', '|Latest Release Value|', '|Penultimate Release Date|', '|Penultimate Release Value|', '|Change in Value between Periods (%)|'])
         econ_df.set_index('|Indicator|', inplace=True)
         return econ_df
     
-    #Economic Ratios
-    def econ_ratios(self):
-        print("This method is currently under construction. Please check back later.")
+    #Economic Report
+    def econ_report(self):
+        def exp_cont_inc_dec(series, verbiage):
+            tedious_col_name = '|Change in Value between Periods (%)|'
+            if verbiage == 'ec':
+                if series[tedious_col_name] > 0:
+                    return 'expansion'
+                elif series[tedious_col_name] < 0:
+                    return 'contraction'
+                else:
+                    return 'stagnation'
+            elif verbiage == 'id':
+                if series[tedious_col_name] > 0:
+                    return 'increase'
+                elif series[tedious_col_name] < 0:
+                    return 'decrease'
+                else:
+                    return 'flatline'
+        
+        def pct_grabber(series):
+            tedious_col_name = '|Change in Value between Periods (%)|'
+            return f"{series[tedious_col_name]:.2f}%"
 
+        categories_list = [self.econ_growth_ids,self.house_inc_exp_ids,self.bus_prof_inv_ids,self.labor_ids,self.inf_def_ids,self.production_ids,self.housing_ids,self.finance_ids,self.gov_ids,self.econ_wb_ids,self.intl_figs_ids]
+        print(f"{((75-26)//2) * '*'}Loading Economic Report...{((75-26)//2) * '*'}", end="\r")
+        df_agg_cat_list = [self.agg_category(x) for x in categories_list]
+        text_list = [
+            "***Disclaimer: The following indicators are updated at different intervals, and, for those release at the same interval, release dates may vary. This report serves to give a general economic outlook in a range of three to six months of the U.S. economy. If you would like specific dates for the indicators used, please view the appendix.***",
+            f"Prepared on {datetime.today()}",
+            "\n"
+            f"Beginning with economic growth, there has been a {pct_grabber(df_agg_cat_list[0].loc['Real GDP'])} {exp_cont_inc_dec(df_agg_cat_list[0].loc['Real GDP'], 'ec')} in Real GDP over the last recorded quarter.",
+            f"The U.S. Total Trade Balance and International Investment Position have {exp_cont_inc_dec(df_agg_cat_list[10].loc['Balance of Trade'], 'id')}d by {pct_grabber(df_agg_cat_list[10].loc['Balance of Trade'])} over the last recorded month and {exp_cont_inc_dec(df_agg_cat_list[10].loc['International Investment Position'], 'id')}d by {pct_grabber(df_agg_cat_list[10].loc['International Investment Position'])} over the last quarter respectively.",
+            f"For U.S. consumers, there has been a(n) {pct_grabber(df_agg_cat_list[1].loc['Personal Savings Rate'])} {exp_cont_inc_dec(df_agg_cat_list[1].loc['Personal Savings Rate'], 'id')} in the Personal Savings Rate over the last recorded month, which was accompanied by a respective {pct_grabber(df_agg_cat_list[1].loc['Retail Sales'])} {exp_cont_inc_dec(df_agg_cat_list[1].loc['Retail Sales'], 'id')} and {pct_grabber(df_agg_cat_list[1].loc['Consumer Credit'])} {exp_cont_inc_dec(df_agg_cat_list[1].loc['Consumer Credit'], 'id')} in Retail Sales and Consumer Credit Balances ({pct_grabber(df_agg_cat_list[1].loc['Consumer Credit Delinquency Rate'])} {exp_cont_inc_dec(df_agg_cat_list[1].loc['Consumer Credit Delinquency Rate'], 'id')} in Consumer Credit Delinquencies (recorded on a quarterly basis)). To finish off with Consumer Sentiment, there has been a(n) {exp_cont_inc_dec(df_agg_cat_list[1].loc['Consumer Sentiment (UMich)'], 'id')} in consumer attitudes.",
+            f"On the other side of the same coin, U.S. producers have seen an overall {exp_cont_inc_dec(df_agg_cat_list[5].loc['Industrial Production Index'], 'ec')} of Industrial Production ({pct_grabber(df_agg_cat_list[5].loc['Industrial Production Index'])}) over the past month with {exp_cont_inc_dec(df_agg_cat_list[5].loc['Capacity Utilization Index'], 'id')}d Capacity Utilization ({pct_grabber(df_agg_cat_list[5].loc['Capacity Utilization Index'])}). On the demand side of the producers, there has been a(n) {exp_cont_inc_dec(df_agg_cat_list[5].loc['Inventory-to-Sales Ratio'], 'id')} of Inventory Turnover by {pct_grabber(df_agg_cat_list[5].loc['Inventory-to-Sales Ratio'])} and a(n) {pct_grabber(df_agg_cat_list[5].loc['Manufacturers New Orders'])} {exp_cont_inc_dec(df_agg_cat_list[5].loc['Manufacturers New Orders'], 'id')} of New Orders.",
+            f"U.S. corporations have seen a(n) {exp_cont_inc_dec(df_agg_cat_list[2].loc['Corporate Profits after Taxes'], 'id')} in their profits by a margin of {pct_grabber(df_agg_cat_list[2].loc['Corporate Profits after Taxes'])}.",
+            f"In the labor market, we have seen a {pct_grabber(df_agg_cat_list[3].loc['Employment Level'])} {exp_cont_inc_dec(df_agg_cat_list[3].loc['Employment Level'], 'ec')} of the employment level and a(n) {exp_cont_inc_dec(df_agg_cat_list[3].loc['Unemployment Rate'], 'id')} in the Unemployment Rate of {pct_grabber(df_agg_cat_list[3].loc['Unemployment Rate'])}. For those in the private sector, private laborers' average weekly hours and their accompanying weekly wages saw a {pct_grabber(df_agg_cat_list[3].loc['Average Total Private Work Hours'])} {exp_cont_inc_dec(df_agg_cat_list[3].loc['Average Total Private Work Hours'], 'id')} and a {pct_grabber(df_agg_cat_list[3].loc['Average Total Private Work Earnings'])} {exp_cont_inc_dec(df_agg_cat_list[3].loc['Average Total Private Work Earnings'], 'id')}. Under such conditions, there has been a {pct_grabber(df_agg_cat_list[3].loc['Non-Farm Labor Productivity'])} {exp_cont_inc_dec(df_agg_cat_list[3].loc['Non-Farm Labor Productivity'], 'id')} in Labor Productivity over the past quarter.\n On the private employer side, the overall cost of employment has had a(n) {exp_cont_inc_dec(df_agg_cat_list[3].loc['Private Employment Cost Index'], 'id')} of {pct_grabber(df_agg_cat_list[3].loc['Private Employment Cost Index'])}, accompanied by a {pct_grabber(df_agg_cat_list[3].loc['Non-Farm Unit Labor Costs'])} {exp_cont_inc_dec(df_agg_cat_list[3].loc['Non-Farm Unit Labor Costs'], 'id')} of Non-Farm Unit Labor Costs over the last recorded quarter.",
+            f"Housing affordability in the American Real Estate market has {exp_cont_inc_dec(df_agg_cat_list[6].loc['Housing Affordability Index'], 'id')}d by {pct_grabber(df_agg_cat_list[6].loc['Housing Affordability Index'])} in the last recorded month, with an accompanying {pct_grabber(df_agg_cat_list[6].loc['Housing Price Index'])} {exp_cont_inc_dec(df_agg_cat_list[6].loc['Housing Price Index'], 'id')} in housing prices over the past quarter. On the supply side, new single-family residential property sales saw a(n) {pct_grabber(df_agg_cat_list[6].loc['New Single Family Residential Home Sales'])} {exp_cont_inc_dec(df_agg_cat_list[6].loc['New Single Family Residential Home Sales'], 'id')} and existing residential properties saw a(n) {pct_grabber(df_agg_cat_list[6].loc['Existing Home Sales'])} {exp_cont_inc_dec(df_agg_cat_list[6].loc['Existing Home Sales'], 'id')}. New Housing Starts have {exp_cont_inc_dec(df_agg_cat_list[6].loc['Housing Starts'], 'id')}d by {pct_grabber(df_agg_cat_list[6].loc['Housing Starts'])}. Over the last recorded quarter, Mortgage Delinquency Rates have had a(n) {pct_grabber(df_agg_cat_list[6].loc['Single Family Residential Mortgage Delinquency Rate'])} {exp_cont_inc_dec(df_agg_cat_list[6].loc['Single Family Residential Mortgage Delinquency Rate'], 'id')}.",
+            f"In terms of financing the economy, under the current rate conditions, there has been a {pct_grabber(df_agg_cat_list[7].loc['Bank Loans'])} {exp_cont_inc_dec(df_agg_cat_list[7].loc['Bank Loans'], 'id')} in Bank Loans over the past week.",
+            f"The U.S. Government has seen a {pct_grabber(df_agg_cat_list[8].loc['Government Expenditures'])} {exp_cont_inc_dec(df_agg_cat_list[8].loc['Government Expenditures'], 'id')} in Expenditures over the last recorded quarter.",
+            f"To finish off with the state of economic wellbeing in the United States, there has been a {pct_grabber(df_agg_cat_list[9].loc['Share of Wealth (top 1%)'])} {exp_cont_inc_dec(df_agg_cat_list[9].loc['Share of Wealth (top 1%)'], 'id')} in the one percent's share of the nation's wealth and a {pct_grabber(df_agg_cat_list[9].loc['Poverty Rate'])} {exp_cont_inc_dec(df_agg_cat_list[9].loc['Poverty Rate'], 'id')} in the poverty rate.",
+            "Thank you so much for reading, and we'll catch you next time."
+        ] 
+
+        for line in text_list:
+            print(line)
+
+        print()
+        cont_input = input("Please Press Enter to Continue")
+        if cont_input:
+            return
+        
+        
 #MASTER UI
 
 class UserInterface():
@@ -420,42 +468,42 @@ class UserInterface():
                     print(f"x{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}x")
             print("x" * (message_width))
             print()
-            try:
-                user_input = int(input("Please enter your option: "))
-                if user_input > 12 or user_input < 1:
-                    print(error_messages["out_of_range_int"])
-                    continue
-                print()
-                if user_input == 1:
-                    category = self.econ_app_obj.econ_growth_ids
-                elif user_input == 2:
-                    category = self.econ_app_obj.house_inc_exp_ids
-                elif user_input == 3:
-                    category = self.econ_app_obj.bus_prof_inv_ids
-                elif user_input == 4:
-                    category = self.econ_app_obj.labor_ids
-                elif user_input == 5:
-                    category = self.econ_app_obj.inf_def_ids
-                elif user_input == 6:
-                    category = self.econ_app_obj.production_ids
-                elif user_input == 7:
-                    category = self.econ_app_obj.housing_ids
-                elif user_input == 8:
-                    category = self.econ_app_obj.finance_ids
-                elif user_input == 9:
-                    category = self.econ_app_obj.gov_ids
-                elif user_input == 10:
-                    category = self.econ_app_obj.econ_wb_ids
-                elif user_input == 11:
-                    category = self.econ_app_obj.intl_figs_ids
-                elif user_input == 12:
-                    return
-                print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end="\r", flush=True)
-                print(self.econ_app_obj.agg_category(category))
-                print()
-            except:
-                print(error_messages['non_int'])
-            user_input = input("Press Enter to Continue")
+            #try:
+            user_input = int(input("Please enter your option: "))
+            if user_input > 12 or user_input < 1:
+                print(error_messages["out_of_range_int"])
+                continue
+            print()
+            if user_input == 1:
+                category = self.econ_app_obj.econ_growth_ids
+            elif user_input == 2:
+                category = self.econ_app_obj.house_inc_exp_ids
+            elif user_input == 3:
+                category = self.econ_app_obj.bus_prof_inv_ids
+            elif user_input == 4:
+                category = self.econ_app_obj.labor_ids
+            elif user_input == 5:
+                category = self.econ_app_obj.inf_def_ids
+            elif user_input == 6:
+                category = self.econ_app_obj.production_ids
+            elif user_input == 7:
+                category = self.econ_app_obj.housing_ids
+            elif user_input == 8:
+                category = self.econ_app_obj.finance_ids
+            elif user_input == 9:
+                category = self.econ_app_obj.gov_ids
+            elif user_input == 10:
+                category = self.econ_app_obj.econ_wb_ids
+            elif user_input == 11:
+                category = self.econ_app_obj.intl_figs_ids
+            elif user_input == 12:
+                return
+            print(f"{((75-10)//2) * '*'}Loading...{((75-10)//2) * '*'}", end="\r", flush=True)
+            print(self.econ_app_obj.agg_category(category))
+            print()
+            #except:
+            #    print(error_messages['non_int'])
+            #user_input = input("Press Enter to Continue")
             if user_input:
                 continue
             print()
@@ -466,7 +514,7 @@ class UserInterface():
         user_options = {
             "intro": "Welcome to the Economic Dashboard",
             "option_1": "Enter 1 to View Categorical Series Menu",
-            "option_2": "Enter 2 to View Economic Ratios",
+            "option_2": "Enter 2 to View the Economic Report",
             "option_3": "Enter 3 to Return to Main Menu"
         }
         error_messages = {
@@ -484,21 +532,21 @@ class UserInterface():
                     print(f"*{' ' * ((((message_width - len(value))-2)//2))}{value}{' ' * ((((message_width - len(value))-1)//2))}*")
             print("*" * (message_width))
             print()
-            try:
-                user_input = int(input("Please enter your option: "))
-                if user_input > 3 or user_input < 1:
-                    print(error_messages['out_of_range_int'])
-                    continue
-                #Output Func Calls
-                print()
-                if user_input == 1:
-                    self.econ_series_menu()
-                elif user_input == 2:
-                    self.econ_app_obj.econ_ratios()
-                elif user_input == 3:
-                    break
-            except:
-                print(error_messages['non_int'])
+            #try:
+            user_input = int(input("Please enter your option: "))
+            if user_input > 4 or user_input < 1:
+                print(error_messages['out_of_range_int'])
+                continue
+            #Output Func Calls
+            print()
+            if user_input == 1:
+                self.econ_series_menu()
+            elif user_input == 2:
+                self.econ_app_obj.econ_report()
+            elif user_input == 3:
+                break
+            #except:
+            #    print(error_messages['non_int'])
             print()
 
 #TOP-LEVEL APPLICATION

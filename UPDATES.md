@@ -50,3 +50,8 @@
 
 ********Beta 1.0 Complete************
 
+3/2/2024
+1) Began writing out the script for the econ_report() method in the EconApplications class.
+2) Created the exp_cont_inc_dec() function within the econ_report class to house the conditionals required to discern an expansion, contraction, increase, or decrease in the script.
+3) Converted all of the print lines in the econ_report into a text list (for future application development).
+4) Finished the report section of the econ_report() method (still needs appendix).
